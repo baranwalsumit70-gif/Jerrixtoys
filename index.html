@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<script src="./image-slot.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#fffaf7;font-family:Poppins,sans-serif;color:#1b1f5e;-webkit-font-smoothing:antialiased}
+a{color:#ff4f8b;text-decoration:none}a:hover{color:#e23a76;text-decoration:underline}
+*{box-sizing:border-box}
+@keyframes jx-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.jx-track:hover{animation-play-state:paused}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#fffaf7;padding-bottom:96px">
+
+  <sc-if value="{{ showTicker }}" hint-placeholder-val="{{ true }}"><div style="background:#1b1f5e;color:#fff;overflow:hidden;position:relative;z-index:21;height:38px">{{ ticker }}</div></sc-if>
+
+  <header style="background:#fff;border-bottom:1px solid #f1e6e0;position:sticky;top:0;z-index:20">
+    <div style="max-width:1280px;margin:0 auto;padding:12px 24px;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px 20px">
+      <nav style="display:flex;gap:0;flex-wrap:nowrap;order:1;min-width:0">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="5">
+          <button onClick="{{ n.go }}" style="border:0;background:{{ n.bg }};color:{{ n.color }};font:{{ n.font }};padding:8px clamp(6px,0.8vw,12px);border-radius:999px;cursor:pointer;white-space:nowrap">{{ n.label }}</button>
+        </sc-for>
+      </nav>
+      <button onClick="{{ goHome }}" style="border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1;padding:0;order:2;justify-self:center">
+        <span style="font-family:Fredoka;font-weight:700;font-size:26px;color:#1fa3e0;letter-spacing:-.01em">JerriX</span>
+        <span style="font-family:Fredoka;font-weight:700;font-size:22px;color:#fff;background:#ff4f8b;padding:2px 10px 4px;border-radius:8px;margin-top:-2px">Toys</span>
+      </button>
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;order:3;min-width:0">
+        <div style="position:relative;display:flex;align-items:center;gap:8px;background:#f6f3fb;border-radius:999px;padding:0 12px;height:36px;flex:0 1 220px;min-width:0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1fa3e0" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <input value="{{ q }}" onChange="{{ setQ }}" onKeyDown="{{ qKey }}" onFocus="{{ qFocus }}" onBlur="{{ qBlur }}" placeholder="Search kits, age, theme…" style="border:0;background:transparent;outline:none;font:14px Poppins;color:#1b1f5e;width:100%">
+          <sc-if value="{{ showSuggest }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:52px;left:0;right:0;background:#fff;border-radius:18px;box-shadow:0 20px 40px -16px rgba(27,31,94,.4);border:1px solid #f1e6e0;padding:8px;z-index:40;display:flex;flex-direction:column;gap:2px">
+              <sc-for list="{{ suggest }}" as="r" hint-placeholder-count="3">
+                <button onMouseDown="{{ r.open }}" style="display:flex;align-items:center;gap:12px;border:0;background:transparent;border-radius:12px;padding:8px;cursor:pointer;text-align:left" style-hover="background:#f6f3fb">
+                  <span style="width:40px;height:40px;border-radius:10px;background:{{ r.tint }};flex:none"></span>
+                  <span style="display:flex;flex-direction:column;min-width:0"><span style="font:600 14px Fredoka;color:#1b1f5e">{{ r.name }}</span><span style="font-size:12px;color:#555a8a">Age {{ r.age }} · {{ r.priceTxt }}</span></span>
+                </button>
+              </sc-for>
+              <sc-if value="{{ noSuggest }}" hint-placeholder-val="{{ false }}"><span style="padding:10px;font-size:13px;color:#555a8a">No kits match “{{ q }}”</span></sc-if>
+              <button onMouseDown="{{ qAll }}" style="border:0;border-top:1px solid #f1e6e0;background:transparent;padding:10px 8px 6px;cursor:pointer;font:600 13px Poppins;color:#ff4f8b;text-align:left">See all results</button>
+            </div>
+          </sc-if>
+        </div>
+        <button aria-label="Account" onClick="{{ openSignin }}" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;cursor:pointer;display:grid;place-items:center;white-space:nowrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b1f5e" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>
+        </button>
+        <button aria-label="Cart" onClick="{{ openCart }}" style="position:relative;width:44px;height:44px;border-radius:999px;border:0;background:#fff0f5;cursor:pointer;display:grid;place-items:center;white-space:nowrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b1f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"></path><path d="M9 7a3 3 0 0 1 6 0"></path></svg>
+          <span style="position:absolute;top:2px;right:2px;min-width:18px;height:18px;border-radius:999px;background:#ff4f8b;color:#fff;font-size:11px;font-weight:600;display:grid;place-items:center;padding:0 4px">{{ cartCount }}</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <section data-screen-label="Home" style="background:#b4e3fc;position:relative;overflow:hidden;height:clamp(560px,46vw,860px);display:flex;align-items:center">
+      <div style="position:absolute;right:2vw;bottom:44px;width:min(62vw,1180px);aspect-ratio:3/2;z-index:2"><image-slot id="hero-cutout" transparent="" src="assets/hero-cutout.webp" shape="rect" fit="contain" placeholder="Drop hero cut-out PNG (transparent)" style="position:absolute;inset:0;width:100%;height:100%"></image-slot></div>
+      <div style="position:relative;z-index:2;pointer-events:none;width:100%;padding:0 4vw 6vw">
+        <div style="display:flex;flex-direction:column;gap:clamp(14px,1.4vw,24px);width:max(300px,30vw);pointer-events:auto">
+          <span style="align-self:flex-start;background:#fff;color:#ff4f8b;font:600 13px Poppins;padding:8px 14px;border-radius:999px;white-space:nowrap">India's first 3D chalk colouring kits</span>
+          <h1 style="margin:0;font:700 clamp(32px,3.3vw,64px)/1.05 Fredoka;color:#1b1f5e;letter-spacing:-.02em;text-wrap:balance">90 minutes to build <span style="color:#6a1fe0">focus</span>, <span style="color:#ee2b3b">confidence</span> &amp; <span style="color:#1a9b57">skills</span></h1>
+          <p style="margin:0;font-size:clamp(15px,1vw,18px);line-height:1.6;color:#1b1f5e;max-width:460px;text-wrap:pretty">Kids build, paint and reuse real 3D chalk models. No screens, no mess, no wrong answers.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button onClick="{{ goCatalogue }}" style="border:0;background:{{ ctaBg }};color:{{ ctaFg }};font:600 17px Fredoka;padding:0 32px;height:56px;border-radius:999px;cursor:pointer;box-shadow:0 6px 0 {{ ctaShadow }};white-space:nowrap">Shop kits</button>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ trust }}" as="t" hint-placeholder-count="4">
+              <span style="display:flex;align-items:center;gap:8px;background:#fff;padding:7px 12px;border-radius:999px;font:500 13px Poppins;color:#1b1f5e;white-space:nowrap"><span style="width:8px;height:8px;border-radius:99px;background:{{ t.c }}"></span>{{ t.label }}</span>
+            </sc-for>
+          </div>
+        </div>
+        
+      </div>
+      <svg viewBox="0 0 1440 80" preserveAspectRatio="none" style="position:absolute;z-index:3;pointer-events:none;bottom:-1px;left:0;width:100%;height:60px;display:block"><path d="M0 40 C 180 90 360 0 540 30 S 900 80 1080 30 S 1320 10 1440 40 V80 H0Z" fill="#fffaf7"></path></svg>
+    </section>
+
+    <section id="how" style="max-width:1200px;margin:0 auto;padding:72px 24px 40px">
+      <h2 style="margin:0 0 8px;text-align:center;font:700 clamp(32px,4vw,44px) Fredoka;letter-spacing:-.02em">From blank to brilliant</h2>
+      <p style="margin:0 0 48px;text-align:center;color:#555a8a;font-size:16px">One kit, three moments your child will remember.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:32px">
+        <sc-for list="{{ story }}" as="s" hint-placeholder-count="3">
+          <div style="display:flex;flex-direction:column;gap:16px;align-items:center;text-align:center">
+            <div style="width:100%;aspect-ratio:4/3;border-radius:28px;background:repeating-linear-gradient(135deg,rgba(27,31,94,.07) 0 10px,transparent 10px 20px),{{ s.tint }};display:grid;place-items:center;transform:rotate({{ s.rot }});position:relative;overflow:hidden">
+              <image-slot id="story-{{ $index }}" src="{{ s.src }}" shape="rect" placeholder="{{ s.shot }}" style="position:absolute;inset:0;width:100%;height:100%"></image-slot>
+            </div>
+            <span style="background:{{ s.c }};color:#fff;font:600 20px Fredoka;padding:8px 24px;border-radius:999px">{{ s.label }}</span>
+            <p style="margin:0;color:#3a3f73;font-size:15px">{{ s.desc }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="max-width:1280px;margin:0 auto;padding:56px 24px">
+      <h2 style="margin:0 0 24px;text-align:center;font:700 clamp(32px,4vw,44px)/1.1 Fredoka;letter-spacing:-.02em">Big skills hidden inside <span style="color:#ff4f8b">big fun</span></h2>
+      <div style="position:relative;width:100%;aspect-ratio:1942/809;border-radius:36px;overflow:hidden;background:#fff;box-shadow:0 20px 40px -24px rgba(27,31,94,.25)">
+        <image-slot id="skills-banner" src="assets/skills-banner.webp" shape="rect" fit="cover" placeholder="Skills banner" style="position:absolute;inset:0;width:100%;height:100%"></image-slot>
+      </div>
+    </section>
+
+    <section style="max-width:1280px;margin:0 auto;padding:56px 24px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:28px">
+        <h2 style="margin:0;font:700 clamp(32px,4vw,44px) Fredoka;letter-spacing:-.02em">Meet the bestsellers</h2>
+        <button onClick="{{ goCatalogue }}" style="border:0;background:transparent;color:#ff4f8b;font:600 16px Fredoka;cursor:pointer;padding:12px 0">View all kits →</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px">
+        <sc-for list="{{ bestsellers }}" as="p" hint-placeholder-count="4">
+          <div onClick="{{ p.open }}" role="link" style="cursor:pointer;background:#fff;border-radius:28px;padding:10px;display:flex;flex-direction:column;gap:14px;border:2px solid #f6eee9;transition:transform .2s ease, box-shadow .2s ease" style-hover="transform:translateY(-4px) rotate(-0.6deg);box-shadow:0 18px 36px -20px rgba(27,31,94,.35)">
+            <div style="position:relative;overflow:hidden;aspect-ratio:1/1;border-radius:22px;background:{{ p.tint }}">
+              <image-slot id="prod-{{ p.id }}" src="{{ p.img }}" shape="rect" placeholder="{{ p.theme }} kit · box photo" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></image-slot>
+<span style="position:absolute;z-index:1;pointer-events:none;bottom:10px;left:10px;background:#fff;color:#1b1f5e;font:600 12px Fredoka;padding:5px 10px 5px 8px;border-radius:999px;white-space:nowrap;transform:rotate(3deg);box-shadow:0 4px 10px -4px rgba(27,31,94,.35);display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;display:block;transform:rotate(-10deg);background-image:url({{ p.stickerIcon }});background-size:contain;background-repeat:no-repeat"></span>{{ p.sticker }}</span>
+              <sc-if value="{{ showBadges }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;z-index:1;pointer-events:none;top:8px;left:8px;width:64px;height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#ffd84d;color:#1b1f5e;clip-path:polygon(50% 0%,61% 12%,76% 7%,79% 22%,93% 26%,88% 41%,100% 50%,88% 59%,93% 74%,79% 78%,76% 93%,61% 88%,50% 100%,39% 88%,24% 93%,21% 78%,7% 74%,12% 59%,0% 50%,12% 41%,7% 26%,21% 22%,24% 7%,39% 12%);transform:rotate(-10deg);line-height:1"><span style="font:700 19px Fredoka">{{ p.pct }}%</span><span style="font:700 11px Fredoka;letter-spacing:.04em">OFF</span></span></sc-if>
+            </div>
+            <div style="padding:0 8px 6px;display:flex;flex-direction:column;gap:6px">
+              <span style="font:500 12px Poppins;color:#555a8a">Age {{ p.age }}</span>
+              <button onClick="{{ p.open }}" style="border:0;background:transparent;padding:0;text-align:left;cursor:pointer;font:600 18px/1.25 Fredoka;color:#1b1f5e">{{ p.name }}</button>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px">
+                <div style="display:flex;align-items:baseline;gap:6px">
+                  <span style="font:700 20px Fredoka;color:#1b1f5e">{{ p.priceTxt }}</span>
+                  <span style="font-size:13px;color:#8a8db0;text-decoration:line-through">{{ p.mrpTxt }}</span>
+                </div>
+                <button onClick="{{ p.add }}" aria-label="Add to cart" style="width:48px;height:48px;flex:none;border:0;border-radius:999px;background:{{ ctaBg }};color:{{ ctaFg }};font:600 26px/1 Fredoka;cursor:pointer;box-shadow:0 4px 0 {{ ctaShadow }};display:grid;place-items:center" style-hover="transform:rotate(90deg)" style-active="transform:translateY(3px);box-shadow:0 1px 0 {{ ctaShadow }}">+</button>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ isCatalogue }}" hint-placeholder-val="{{ false }}">
+    <section data-screen-label="Catalogue" style="max-width:1280px;margin:0 auto;padding:40px 24px">
+      <h1 style="margin:0 0 6px;font:700 clamp(36px,4vw,48px) Fredoka;letter-spacing:-.02em">All colouring kits</h1>
+      <p style="margin:0 0 28px;color:#555a8a">Every kit includes chalk models, 6 non-toxic colours and a brush.</p>
+      <sc-if value="{{ hasQActive }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ clearQ }}" style="border:0;background:#1b1f5e;color:#fff;font:500 14px Poppins;height:40px;padding:0 16px;border-radius:999px;cursor:pointer;margin:-12px 0 20px;white-space:nowrap">Results for “{{ qActive }}” ✕</button>
+      </sc-if>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:#fff;border-radius:999px;padding:8px 8px 8px 20px;margin-bottom:28px;box-shadow:0 8px 24px -18px rgba(27,31,94,.35)">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font:600 14px Poppins;margin-right:4px">Age</span>
+          <sc-for list="{{ ages }}" as="a" hint-placeholder-count="3">
+            <button onClick="{{ a.pick }}" style="border:2px solid {{ a.border }};background:{{ a.bg }};color:{{ a.color }};font:600 14px Poppins;height:44px;padding:0 18px;border-radius:999px;cursor:pointer;white-space:nowrap">{{ a.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:14px;color:#555a8a">{{ countTxt }}</span>
+          <label style="display:flex;align-items:center;gap:8px;background:#f6f3fb;border-radius:999px;height:44px;padding:0 6px 0 18px;font:600 14px Poppins">
+            Sort
+            <select onChange="{{ setSort }}" value="{{ sort }}" style="border:0;background:#fff;height:34px;border-radius:999px;padding:0 14px;font:500 14px Poppins;color:#1b1f5e;cursor:pointer">
+              <option value="featured">Featured</option>
+              <option value="low">Price: low to high</option>
+              <option value="high">Price: high to low</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px">
+        <sc-for list="{{ catalogue }}" as="p" hint-placeholder-count="8">
+          <div onClick="{{ p.open }}" role="link" style="cursor:pointer;background:#fff;border-radius:28px;padding:10px;display:flex;flex-direction:column;gap:14px;border:2px solid #f6eee9;transition:transform .2s ease, box-shadow .2s ease" style-hover="transform:translateY(-4px) rotate(-0.6deg);box-shadow:0 18px 36px -20px rgba(27,31,94,.35)">
+            <div style="position:relative;overflow:hidden;aspect-ratio:1/1;border-radius:22px;background:{{ p.tint }}">
+              <image-slot id="prod-{{ p.id }}" src="{{ p.img }}" shape="rect" placeholder="{{ p.theme }} kit · box photo" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></image-slot>
+<span style="position:absolute;z-index:1;pointer-events:none;bottom:10px;left:10px;background:#fff;color:#1b1f5e;font:600 12px Fredoka;padding:5px 10px 5px 8px;border-radius:999px;white-space:nowrap;transform:rotate(3deg);box-shadow:0 4px 10px -4px rgba(27,31,94,.35);display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;display:block;transform:rotate(-10deg);background-image:url({{ p.stickerIcon }});background-size:contain;background-repeat:no-repeat"></span>{{ p.sticker }}</span>
+              <sc-if value="{{ showBadges }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;z-index:1;pointer-events:none;top:8px;left:8px;width:64px;height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#ffd84d;color:#1b1f5e;clip-path:polygon(50% 0%,61% 12%,76% 7%,79% 22%,93% 26%,88% 41%,100% 50%,88% 59%,93% 74%,79% 78%,76% 93%,61% 88%,50% 100%,39% 88%,24% 93%,21% 78%,7% 74%,12% 59%,0% 50%,12% 41%,7% 26%,21% 22%,24% 7%,39% 12%);transform:rotate(-10deg);line-height:1"><span style="font:700 19px Fredoka">{{ p.pct }}%</span><span style="font:700 11px Fredoka;letter-spacing:.04em">OFF</span></span></sc-if>
+            </div>
+            <div style="padding:0 8px 6px;display:flex;flex-direction:column;gap:6px">
+              <span style="font:500 12px Poppins;color:#555a8a">Age {{ p.age }}</span>
+              <button onClick="{{ p.open }}" style="border:0;background:transparent;padding:0;text-align:left;cursor:pointer;font:600 18px/1.25 Fredoka;color:#1b1f5e">{{ p.name }}</button>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px">
+                <div style="display:flex;align-items:baseline;gap:6px">
+                  <span style="font:700 20px Fredoka;color:#1b1f5e">{{ p.priceTxt }}</span>
+                  <span style="font-size:13px;color:#8a8db0;text-decoration:line-through">{{ p.mrpTxt }}</span>
+                </div>
+                <button onClick="{{ p.add }}" aria-label="Add to cart" style="width:48px;height:48px;flex:none;border:0;border-radius:999px;background:{{ ctaBg }};color:{{ ctaFg }};font:600 26px/1 Fredoka;cursor:pointer;box-shadow:0 4px 0 {{ ctaShadow }};display:grid;place-items:center" style-hover="transform:rotate(90deg)" style-active="transform:translateY(3px);box-shadow:0 1px 0 {{ ctaShadow }}">+</button>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ isProduct }}" hint-placeholder-val="{{ false }}">
+    <section data-screen-label="Product" style="max-width:1280px;margin:0 auto;padding:28px 24px 40px">
+      <div style="display:flex;gap:8px;font-size:13px;color:#555a8a;margin-bottom:20px;flex-wrap:wrap">
+        <button onClick="{{ goHome }}" style="border:0;background:transparent;padding:0;cursor:pointer;color:#555a8a;font:inherit">Home</button><span>/</span>
+        <button onClick="{{ goCatalogue }}" style="border:0;background:transparent;padding:0;cursor:pointer;color:#555a8a;font:inherit">Catalogue</button><span>/</span>
+        <span style="color:#1b1f5e;font-weight:500">{{ cur.name }}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:48px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:14px;position:sticky;top:100px">
+          <div style="position:relative;overflow:hidden;aspect-ratio:1/1;border-radius:32px;background:repeating-linear-gradient(135deg,rgba(27,31,94,.06) 0 10px,transparent 10px 20px),{{ cur.tint }};display:grid;place-items:center">
+            <sc-if value="{{ isVideo }}" hint-placeholder-val="{{ false }}"><video src="assets/pdp-video.mp4" autoplay="" muted="" loop="" playsinline="" controls="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000"></video></sc-if>
+            <sc-if value="{{ notVideo }}" hint-placeholder-val="{{ true }}"><image-slot id="{{ slideSlot }}" src="{{ slideSrc }}" shape="rect" placeholder="{{ slideLabel }}" fit="contain" style="position:absolute;inset:0;width:100%;height:100%"></image-slot></sc-if>
+            <button aria-label="Previous image" onClick="{{ prevImg }}" style="position:absolute;z-index:1;left:16px;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:999px;border:0;background:#fff;box-shadow:0 6px 18px -6px rgba(27,31,94,.4);cursor:pointer;display:grid;place-items:center;white-space:nowrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1b1f5e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+            <button aria-label="Next image" onClick="{{ nextImg }}" style="position:absolute;z-index:1;right:16px;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:999px;border:0;background:#fff;box-shadow:0 6px 18px -6px rgba(27,31,94,.4);cursor:pointer;display:grid;place-items:center;white-space:nowrap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1b1f5e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <span style="position:absolute;z-index:1;pointer-events:none;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(27,31,94,.8);color:#fff;font:500 12px Poppins;padding:6px 12px;white-space:nowrap;border-radius:999px">{{ slideCount }}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px">
+            <sc-for list="{{ thumbs }}" as="t" hint-placeholder-count="5">
+              <button onClick="{{ t.pick }}" aria-label="{{ t.label }}" style="position:relative;overflow:hidden;aspect-ratio:1/1;border-radius:14px;border:3px solid {{ t.border }};background:{{ t.bg }};background-image:{{ t.bgImg }};background-size:cover;background-position:center;cursor:pointer;display:grid;place-items:center;font:600 11px Poppins;color:{{ t.color }};padding:4px"><span style="background:{{ t.chip }};padding:3px 8px;border-radius:999px">{{ t.text }}</span></button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span style="background:#e6f5ff;color:#0b6ea8;font:600 13px Poppins;padding:6px 12px;border-radius:999px;white-space:nowrap">Age {{ cur.age }}</span>
+            <span style="background:#fff0f5;color:#c8235f;font:600 13px Poppins;padding:6px 12px;border-radius:999px;white-space:nowrap">DIY STEAM</span>
+            <span style="background:#eef9e8;color:#2f7d1f;font:600 13px Poppins;padding:6px 12px;border-radius:999px;white-space:nowrap">{{ cur.tag }}</span>
+          </div>
+          <div>
+            <h1 style="margin:0;font:700 clamp(34px,3.6vw,46px)/1.08 Fredoka;letter-spacing:-.02em;text-wrap:balance">{{ cur.name }}</h1>
+            <p style="margin:10px 0 0;color:#555a8a;font-size:15px">{{ cur.sub }}</p>
+            <div style="margin-top:10px;font-size:14px;color:#1b1f5e">{{ cur.ratingTxt }}</div>
+          </div>
+
+          <div style="background:#fff;border-radius:24px;padding:20px 22px;display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 30px -22px rgba(27,31,94,.4)">
+            <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+              <span style="font:700 36px Fredoka;color:#ff4f8b">{{ cur.priceTxt }}</span>
+              <span style="font-size:16px;color:#8a8db0">MRP <span style="text-decoration:line-through">{{ cur.mrpTxt }}</span></span>
+              <span style="background:#e8f7ee;color:#167a43;font:600 13px Poppins;padding:6px 12px;border-radius:999px;white-space:nowrap">You save {{ cur.saveTxt }} ({{ cur.pct }}% off)</span>
+            </div>
+            <div style="font-size:13px;color:#555a8a">Inclusive of all taxes · Free delivery in 3–5 days</div>
+            <div style="border-top:1px dashed #e7dcd6;padding-top:10px;font-size:14px;color:#1b1f5e">First order? Take an extra 5% off at checkout with code <strong style="background:#fff3d6;padding:2px 8px;border-radius:6px">WELCOME5</strong></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;background:#fff8d6;border:2px dashed #ffc94d;border-radius:20px;padding:12px 16px">
+            <div style="position:relative;width:96px;height:64px;flex:none;border-radius:12px;overflow:hidden;background:#fff;border:2px solid #fff;box-shadow:0 6px 14px -6px rgba(27,31,94,.35);transform:rotate(-5deg)"><image-slot id="sticker-sheet" src="assets/sticker-sheet.webp" fit="cover" shape="rect" placeholder="Sticker" style="position:absolute;inset:0;width:100%;height:100%"></image-slot></div>
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <span style="font:600 17px Fredoka;color:#1b1f5e">{{ cur.sticker }} sheet included</span>
+              <span style="font-size:13px;color:#555a8a">Matches this kit's theme. Added to every order, no code needed.</span>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">
+            <sc-for list="{{ features }}" as="f" hint-placeholder-count="4">
+              <div style="background:{{ f.bg }};border-radius:18px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">
+                <span style="width:36px;height:36px;border-radius:999px;background:{{ f.c }};color:#fff;display:grid;place-items:center;font:700 15px Fredoka">{{ f.initial }}</span>
+                <span style="font:600 13px/1.3 Poppins">{{ f.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font:600 15px Fredoka">Gifting? Add your child's name to the box <span style="font:400 13px Poppins;color:#555a8a">· free</span></span>
+            <input value="{{ giftName }}" onChange="{{ setGift }}" placeholder="e.g. Aarav" maxlength="14" style="height:48px;border-radius:14px;border:2px solid #ece4f5;background:#fff;padding:0 16px;font:15px Poppins;color:#1b1f5e;outline:none">
+          </label>
+
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;background:#fff;border:2px solid #ece4f5;border-radius:999px;height:56px">
+              <button aria-label="Decrease" onClick="{{ decQty }}" style="width:52px;height:52px;border:0;background:transparent;font:600 22px Fredoka;color:#1b1f5e;cursor:pointer;white-space:nowrap">−</button>
+              <span style="min-width:28px;text-align:center;font:600 18px Fredoka">{{ qty }}</span>
+              <button aria-label="Increase" onClick="{{ incQty }}" style="width:52px;height:52px;border:0;background:transparent;font:600 22px Fredoka;color:#1b1f5e;cursor:pointer;white-space:nowrap">+</button>
+            </div>
+            <button onClick="{{ addCur }}" style="flex:1;min-width:180px;border:0;background:#1b1f5e;color:#fff;font:600 18px Fredoka;height:56px;border-radius:999px;cursor:pointer;white-space:nowrap">Add to cart</button>
+          </div>
+          <button onClick="{{ buyNow }}" style="border:0;background:#ff4f8b;color:#fff;font:600 18px Fredoka;height:56px;border-radius:999px;cursor:pointer;margin-top:-10px;white-space:nowrap">Buy it now</button>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ accordion }}" as="ac" hint-placeholder-count="4">
+              <div style="background:#fff;border-radius:18px;overflow:hidden;border:1px solid #f1e6e0">
+                <button onClick="{{ ac.toggle }}" style="width:100%;border:0;background:transparent;display:flex;justify-content:space-between;align-items:center;padding:18px 20px;cursor:pointer;font:600 17px Fredoka;color:#1b1f5e;text-align:left">
+                  {{ ac.title }}
+                  <span style="width:32px;height:32px;border-radius:999px;background:#f6f3fb;display:grid;place-items:center;font:600 18px Fredoka">{{ ac.sign }}</span>
+                </button>
+                <sc-if value="{{ ac.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:0 20px 20px;font-size:15px;line-height:1.65;color:#3a3f73">
+                    <sc-for list="{{ ac.items }}" as="li" hint-placeholder-count="3">
+                      <div style="display:flex;gap:10px;padding:4px 0"><span style="color:#ff4f8b;font-weight:600">•</span><span>{{ li }}</span></div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:64px;background:#fff;border-radius:32px;padding:32px clamp(20px,3vw,40px);box-shadow:0 10px 30px -22px rgba(27,31,94,.4)">
+        <h2 style="margin:0 0 6px;font:700 28px Fredoka">Frequently bought together</h2>
+        <p style="margin:0 0 24px;color:#555a8a;font-size:15px">Siblings or a weekend project? These pair well.</p>
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <sc-for list="{{ bundle }}" as="b" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:16px">
+              <span style="font:700 26px Fredoka;color:#c9c3e0;display:{{ b.plus }}">+</span>
+              <div style="display:flex;flex-direction:column;gap:8px;width:180px">
+                <div style="position:relative;overflow:hidden;aspect-ratio:1/1;border-radius:18px;background:{{ b.tint }}"><image-slot id="prod-{{ b.id }}" src="{{ b.img }}" shape="rect" placeholder="{{ b.theme }} box" style="position:absolute;inset:0;width:100%;height:100%"></image-slot></div>
+                <div style="font:600 15px/1.3 Fredoka">{{ b.name }}</div>
+                <div style="font-size:14px;color:#555a8a">{{ b.priceTxt }}</div>
+              </div>
+            </div>
+          </sc-for>
+          <div style="margin-left:auto;display:flex;flex-direction:column;gap:10px;min-width:220px">
+            <div style="font-size:14px;color:#555a8a">Total for 3 kits</div>
+            <div style="font:700 30px Fredoka">{{ bundleTotal }}</div>
+            <button onClick="{{ addBundle }}" style="border:0;background:{{ ctaBg }};color:{{ ctaFg }};font:600 17px Fredoka;height:52px;border-radius:999px;cursor:pointer;white-space:nowrap">Add all 3 to cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:56px">
+        <h2 style="margin:0 0 24px;font:700 28px Fredoka">You may also like</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:24px">
+          <sc-for list="{{ related }}" as="p" hint-placeholder-count="4">
+            <div onClick="{{ p.open }}" role="link" style="cursor:pointer;background:#fff;border-radius:28px;padding:10px;display:flex;flex-direction:column;gap:14px;border:2px solid #f6eee9;transition:transform .2s ease, box-shadow .2s ease" style-hover="transform:translateY(-4px) rotate(-0.6deg);box-shadow:0 18px 36px -20px rgba(27,31,94,.35)">
+              <div style="position:relative;overflow:hidden;aspect-ratio:1/1;border-radius:22px;background:{{ p.tint }}">
+                <image-slot id="prod-{{ p.id }}" src="{{ p.img }}" shape="rect" placeholder="{{ p.theme }} kit · box photo" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></image-slot>
+<span style="position:absolute;z-index:1;pointer-events:none;bottom:10px;left:10px;background:#fff;color:#1b1f5e;font:600 12px Fredoka;padding:5px 10px 5px 8px;border-radius:999px;white-space:nowrap;transform:rotate(3deg);box-shadow:0 4px 10px -4px rgba(27,31,94,.35);display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;display:block;transform:rotate(-10deg);background-image:url({{ p.stickerIcon }});background-size:contain;background-repeat:no-repeat"></span>{{ p.sticker }}</span>
+                <sc-if value="{{ showBadges }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;z-index:1;pointer-events:none;top:8px;left:8px;width:64px;height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#ffd84d;color:#1b1f5e;clip-path:polygon(50% 0%,61% 12%,76% 7%,79% 22%,93% 26%,88% 41%,100% 50%,88% 59%,93% 74%,79% 78%,76% 93%,61% 88%,50% 100%,39% 88%,24% 93%,21% 78%,7% 74%,12% 59%,0% 50%,12% 41%,7% 26%,21% 22%,24% 7%,39% 12%);transform:rotate(-10deg);line-height:1"><span style="font:700 19px Fredoka">{{ p.pct }}%</span><span style="font:700 11px Fredoka;letter-spacing:.04em">OFF</span></span></sc-if>
+              </div>
+              <div style="padding:0 8px 6px;display:flex;flex-direction:column;gap:6px">
+                <span style="font:500 12px Poppins;color:#555a8a">Age {{ p.age }}</span>
+                <button onClick="{{ p.open }}" style="border:0;background:transparent;padding:0;text-align:left;cursor:pointer;font:600 18px/1.25 Fredoka;color:#1b1f5e">{{ p.name }}</button>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px">
+                  <div style="display:flex;align-items:baseline;gap:6px">
+                    <span style="font:700 20px Fredoka;color:#1b1f5e">{{ p.priceTxt }}</span>
+                    <span style="font-size:13px;color:#8a8db0;text-decoration:line-through">{{ p.mrpTxt }}</span>
+                  </div>
+                  <button onClick="{{ p.add }}" aria-label="Add to cart" style="width:48px;height:48px;flex:none;border:0;border-radius:999px;background:{{ ctaBg }};color:{{ ctaFg }};font:600 26px/1 Fredoka;cursor:pointer;box-shadow:0 4px 0 {{ ctaShadow }};display:grid;place-items:center" style-hover="transform:rotate(90deg)" style-active="transform:translateY(3px);box-shadow:0 1px 0 {{ ctaShadow }}">+</button>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ isNotes }}" hint-placeholder-val="{{ false }}">
+    <section data-screen-label="UX notes" style="max-width:960px;margin:0 auto;padding:48px 24px">
+      <h1 style="margin:0 0 8px;font:700 clamp(34px,4vw,46px) Fredoka;letter-spacing:-.02em">UX review: what changed</h1>
+      <p style="margin:0 0 32px;color:#555a8a;font-size:16px">Each issue from the audit and how this prototype handles it.</p>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <sc-for list="{{ notes }}" as="n" hint-placeholder-count="10">
+          <div style="background:#fff;border-radius:20px;padding:18px 22px;display:grid;grid-template-columns:110px minmax(0,1fr);gap:16px;border:1px solid #f1e6e0">
+            <span style="align-self:start;background:{{ n.c }};color:#fff;font:600 12px Poppins;padding:6px 10px;border-radius:999px;text-align:center">{{ n.area }}</span>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="font:600 16px Fredoka;color:#1b1f5e">{{ n.issue }}</div>
+              <div style="font-size:14px;color:#3a3f73;line-height:1.55">{{ n.fix }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+
+
+  <sc-if value="{{ isCheckout }}" hint-placeholder-val="{{ false }}">
+    <section data-screen-label="Checkout" style="max-width:1180px;margin:0 auto;padding:40px 24px">
+      <h1 style="margin:0 0 24px;font:700 clamp(32px,3.6vw,44px) Fredoka;letter-spacing:-.02em">Checkout</h1>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:32px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <div style="background:#fff;border:1px solid #f1e6e0;border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:14px">
+            <span style="font:600 20px Fredoka">Contact</span>
+            <label style="display:flex;flex-direction:column;gap:6px;font:600 14px Poppins;color:#1b1f5e">Full name<input value="{{ f.name }}" onChange="{{ setName }}" placeholder="e.g. Priya Sharma" style="height:48px;border-radius:14px;border:2px solid #ece4f5;background:#fff;padding:0 16px;font:15px Poppins;color:#1b1f5e;outline:none;width:100%"></label>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+              <label style="display:flex;flex-direction:column;gap:6px;font:600 14px Poppins;color:#1b1f5e">Mobile number<input value="{{ f.phone }}" onChange="{{ setPhone }}" inputmode="numeric" maxlength="10" placeholder="10-digit mobile" style="height:48px;border-radius:14px;border:2px solid #ece4f5;background:#fff;padding:0 16px;font:15px Poppins;color:#1b1f5e;outline:none;width:100%"></label>
+              <label style="display:flex;flex-direction:column;gap:6px;font:600 14px Poppins;color:#1b1f5e">Email (optional)<input value="{{ f.email }}" onChange="{{ setEmail }}" placeholder="you@email.com" style="height:48px;border-radius:14px;border:2px solid #ece4f5;background:#fff;padding:0 16px;font:15px Poppins;color:#1b1f5e;outline:none;width:100%"></label>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #f1e6e0;border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:14px">
+            <span style="font:600 20px Fredoka">Delivery address</span>
+            <label style="display:flex;flex-direction:column;gap:6px;font:600 14px Poppins;color:#1b1f5e">House, street, area<input value="{{ f.addr }}" onChange="{{ setAddr }}" placeholder="Flat 12, Green Park" style="height:48px;border-radius:14px;border:2px solid #ece4f5;background:#fff;padding:0 16px;font:15px Poppins;color:#1b1f5e;outline:none;width:100%"></label>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+              <label style="display:flex;flex-direction:column;gap:6px;font:600 14px Poppins;color:#1b1f5e">City<input value="{{ f.city }}" onChange="{{ setCity }}" placeholder="Guwahati" style="height:48px;border-radius:14px;border:2px solid #ece4f5;background:#fff;padding:0 16px;font:15px Poppins;color:#1b1f5e;outline:none;width:100%"></label>
+              <label style="display:flex;flex-direction:column;gap:6px;font:600 14px Poppins;color:#1b1f5e">Pincode<input value="{{ f.pin }}" onChange="{{ setPin }}" inputmode="numeric" maxlength="6" placeholder="781001" style="height:48px;border-radius:14px;border:2px solid #ece4f5;background:#fff;padding:0 16px;font:15px Poppins;color:#1b1f5e;outline:none;width:100%"></label>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #f1e6e0;border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:12px">
+            <span style="font:600 20px Fredoka">Payment</span>
+            <sc-for list="{{ payOpts }}" as="o" hint-placeholder-count="3">
+              <button onClick="{{ o.pick }}" style="display:flex;align-items:center;gap:12px;min-height:56px;border:2px solid {{ o.border }};background:{{ o.bg }};border-radius:16px;padding:0 16px;cursor:pointer;text-align:left">
+                <span style="width:20px;height:20px;border-radius:999px;border:2px solid {{ o.border }};display:grid;place-items:center;flex:none"><span style="width:10px;height:10px;border-radius:99px;background:{{ o.dot }}"></span></span>
+                <span style="display:flex;flex-direction:column"><span style="font:600 15px Fredoka;color:#1b1f5e">{{ o.label }}</span><span style="font-size:12px;color:#555a8a">{{ o.sub }}</span></span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #f1e6e0;border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:14px;position:sticky;top:100px">
+          <span style="font:600 20px Fredoka">Order summary</span>
+          <sc-for list="{{ lines }}" as="l" hint-placeholder-count="2">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div style="position:relative;width:56px;height:56px;border-radius:12px;overflow:hidden;background:{{ l.tint }};flex:none"><image-slot id="prod-{{ l.id }}" src="{{ l.img }}" shape="rect" placeholder="" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></image-slot></div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font:600 14px/1.3 Fredoka">{{ l.name }}</span><span style="font-size:12px;color:#555a8a">Qty {{ l.qty }}</span></div>
+              <span style="font:600 14px Poppins">{{ l.totalTxt }}</span>
+            </div>
+          </sc-for>
+          <div style="display:flex;gap:8px;border-top:1px dashed #e7dcd6;padding-top:14px">
+            <input value="{{ code }}" onChange="{{ setCode }}" placeholder="Discount code" style="height:48px;border-radius:14px;border:2px solid #ece4f5;background:#fff;padding:0 16px;font:15px Poppins;color:#1b1f5e;outline:none;width:100%;height:44px;text-transform:uppercase">
+            <button onClick="{{ applyCode }}" style="border:0;background:#f6f3fb;color:#1b1f5e;font:600 14px Poppins;height:44px;padding:0 18px;border-radius:14px;cursor:pointer;white-space:nowrap">Apply</button>
+          </div>
+          <span style="font-size:13px;color:{{ codeColor }}">{{ codeMsg }}</span>
+          <div style="display:flex;justify-content:space-between;font-size:14px;color:#555a8a"><span>Subtotal</span><span>{{ subTxt }}</span></div>
+          <sc-if value="{{ applied }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;font-size:14px;color:#167a43"><span>WELCOME5 (5% off)</span><span>− {{ discTxt }}</span></div></sc-if>
+          <div style="display:flex;justify-content:space-between;font-size:14px;color:#555a8a"><span>Shipping</span><span>Free</span></div>
+          <div style="display:flex;justify-content:space-between;font:700 22px Fredoka;border-top:1px solid #f1e6e0;padding-top:12px"><span>Total</span><span>{{ totalTxt }}</span></div>
+          <sc-if value="{{ hasFormErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#d0263a;background:#fdecee;padding:10px 12px;border-radius:12px">{{ formErr }}</span></sc-if>
+          <button onClick="{{ placeOrder }}" style="border:0;background:#ff4f8b;color:#fff;font:600 18px Fredoka;height:56px;border-radius:999px;cursor:pointer;white-space:nowrap">Place order · {{ totalTxt }}</button>
+          <button onClick="{{ goCatalogue }}" style="border:0;background:transparent;color:#1b1f5e;font:500 14px Poppins;cursor:pointer;text-decoration:underline">Continue shopping</button>
+        </div>
+      </div>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+    <section data-screen-label="Order confirmed" style="max-width:640px;margin:0 auto;padding:72px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px">
+      <span style="width:72px;height:72px;border-radius:999px;background:#e8f7ee;color:#167a43;display:grid;place-items:center;font:700 34px Fredoka">✓</span>
+      <h1 style="margin:0;font:700 clamp(32px,4vw,44px) Fredoka;letter-spacing:-.02em">Thank you, {{ order.name }}!</h1>
+      <p style="margin:0;color:#3a3f73;font-size:16px;line-height:1.6">Order <strong>{{ order.id }}</strong> is confirmed. We'll send updates to {{ order.phone }}.</p>
+      <div style="width:100%;background:#fff;border:1px solid #f1e6e0;border-radius:24px;padding:20px 24px;display:flex;flex-direction:column;gap:10px;text-align:left;margin-top:8px">
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:#555a8a"><span>Items</span><span>{{ order.count }}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:#555a8a"><span>Payment</span><span>{{ order.pay }}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:#555a8a"><span>Deliver to</span><span>{{ order.city }} {{ order.pin }}</span></div>
+        <div style="display:flex;justify-content:space-between;font:700 20px Fredoka;border-top:1px solid #f1e6e0;padding-top:10px"><span>Paid</span><span>{{ order.totalTxt }}</span></div>
+      </div>
+      <button onClick="{{ goCatalogue }}" style="border:0;background:{{ ctaBg }};color:{{ ctaFg }};font:600 17px Fredoka;height:56px;padding:0 32px;border-radius:999px;cursor:pointer;box-shadow:0 6px 0 {{ ctaShadow }};margin-top:8px;white-space:nowrap">Continue shopping</button>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ isAbout }}" hint-placeholder-val="{{ false }}">
+    <section data-screen-label="About" style="max-width:1180px;margin:0 auto;padding:48px 24px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:40px;align-items:center">
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <span style="align-self:flex-start;background:#fff0f5;color:#ff4f8b;font:600 13px Poppins;padding:8px 14px;border-radius:999px;white-space:nowrap">About JerriX Toys</span>
+          <h1 style="margin:0;font:700 clamp(34px,4vw,52px)/1.08 Fredoka;letter-spacing:-.02em;text-wrap:balance">Where play meets purpose</h1>
+          <p style="margin:0;font-size:16px;line-height:1.7;color:#3a3f73;text-wrap:pretty">JerriX Toys is designed by IIT Guwahati alumni. We make India's first 3D chalk colouring kits: chalk models kids paint, display and then draw with, so one kit keeps giving.</p>
+          <p style="margin:0;font-size:16px;line-height:1.7;color:#3a3f73;text-wrap:pretty">Every kit is built around STEAM learning and screen-free play, using child-safe chalk (khadu) and non-toxic colours.</p>
+          <button onClick="{{ goCatalogue }}" style="align-self:flex-start;border:0;background:{{ ctaBg }};color:{{ ctaFg }};font:600 17px Fredoka;height:56px;padding:0 32px;border-radius:999px;cursor:pointer;box-shadow:0 6px 0 {{ ctaShadow }};white-space:nowrap">Shop kits</button>
+        </div>
+        <div style="position:relative;aspect-ratio:4/3;border-radius:32px;overflow:hidden;background:#dcf1fd"><image-slot id="about-photo" shape="rect" placeholder="Team or workshop photo" style="position:absolute;inset:0;width:100%;height:100%"></image-slot></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:56px">
+        <sc-for list="{{ features }}" as="f" hint-placeholder-count="4">
+          <div style="background:{{ f.bg }};border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:10px">
+            <span style="width:44px;height:44px;border-radius:999px;background:{{ f.c }};color:#fff;display:grid;place-items:center;font:700 18px Fredoka">{{ f.initial }}</span>
+            <span style="font:600 19px Fredoka">{{ f.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ isContact }}" hint-placeholder-val="{{ false }}">
+    <section data-screen-label="Contact" style="max-width:720px;margin:0 auto;padding:48px 24px">
+      <h1 style="margin:0 0 8px;font:700 clamp(34px,4vw,48px) Fredoka;letter-spacing:-.02em">Contact us</h1>
+      <p style="margin:0 0 28px;color:#555a8a;font-size:16px">Questions about a kit, an order or bulk gifting? Send us a message.</p>
+      <sc-if value="{{ contactSent }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#e8f7ee;border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+          <span style="font:600 22px Fredoka;color:#167a43">Message sent</span>
+          <span style="color:#1b1f5e">Thanks {{ cf.name }}, we'll reply to {{ cf.email }}.</span>
+          <button onClick="{{ resetContact }}" style="border:2px solid #1b1f5e;background:transparent;color:#1b1f5e;font:600 15px Fredoka;height:44px;padding:0 20px;border-radius:999px;cursor:pointer">Send another</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ contactForm }}" hint-placeholder-val="{{ true }}">
+        <div style="background:#fff;border:1px solid #f1e6e0;border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+            <label style="display:flex;flex-direction:column;gap:6px;font:600 14px Poppins;color:#1b1f5e">Your name<input value="{{ cf.name }}" onChange="{{ setCfName }}" style="height:48px;border-radius:14px;border:2px solid #ece4f5;background:#fff;padding:0 16px;font:15px Poppins;color:#1b1f5e;outline:none;width:100%"></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font:600 14px Poppins;color:#1b1f5e">Email<input value="{{ cf.email }}" onChange="{{ setCfEmail }}" style="height:48px;border-radius:14px;border:2px solid #ece4f5;background:#fff;padding:0 16px;font:15px Poppins;color:#1b1f5e;outline:none;width:100%"></label>
+          </div>
+          <label style="display:flex;flex-direction:column;gap:6px;font:600 14px Poppins;color:#1b1f5e">Topic
+            <select value="{{ cf.topic }}" onChange="{{ setCfTopic }}" style="height:48px;border-radius:14px;border:2px solid #ece4f5;background:#fff;padding:0 16px;font:15px Poppins;color:#1b1f5e;outline:none;width:100%;cursor:pointer">
+              <option>Order help</option><option>Product question</option><option>Bulk / school orders</option><option>Other</option>
+            </select>
+          </label>
+          <label style="display:flex;flex-direction:column;gap:6px;font:600 14px Poppins;color:#1b1f5e">Message<textarea value="{{ cf.msg }}" onChange="{{ setCfMsg }}" rows="5" style="border-radius:14px;border:2px solid #ece4f5;background:#fff;padding:12px 16px;font:15px Poppins;color:#1b1f5e;outline:none;resize:vertical"></textarea></label>
+          <sc-if value="{{ hasCfErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#d0263a">{{ cfErr }}</span></sc-if>
+          <button onClick="{{ sendContact }}" style="align-self:flex-start;border:0;background:#1b1f5e;color:#fff;font:600 17px Fredoka;height:52px;padding:0 28px;border-radius:999px;cursor:pointer;white-space:nowrap">Send message</button>
+        </div>
+      </sc-if>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ isBlogs }}" hint-placeholder-val="{{ false }}">
+    <section data-screen-label="Blogs" style="max-width:1180px;margin:0 auto;padding:48px 24px">
+      <h1 style="margin:0 0 8px;font:700 clamp(34px,4vw,48px) Fredoka;letter-spacing:-.02em">Blogs</h1>
+      <p style="margin:0 0 28px;color:#555a8a;font-size:16px">Ideas for screen-free play at home.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px">
+        <sc-for list="{{ blogs }}" as="b" hint-placeholder-count="3">
+          <button onClick="{{ b.open }}" style="border:1px solid #f1e6e0;background:#fff;border-radius:24px;overflow:hidden;padding:0;cursor:pointer;text-align:left;display:flex;flex-direction:column">
+            <div style="position:relative;aspect-ratio:16/10;background:{{ b.tint }}"><image-slot id="blog-{{ $index }}" src="{{ b.cover }}" fit="cover" shape="rect" placeholder="Blog cover" style="position:absolute;inset:0;width:100%;height:100%"></image-slot></div>
+            <div style="padding:18px 20px 22px;display:flex;flex-direction:column;gap:8px">
+              <span style="font:500 12px Poppins;color:#ff4f8b">{{ b.tag }} · {{ b.mins }} min read</span>
+              <span style="font:600 20px/1.25 Fredoka;color:#1b1f5e">{{ b.title }}</span>
+              <span style="font-size:14px;line-height:1.55;color:#555a8a">{{ b.excerpt }}</span>
+            </div>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ isArticle }}" hint-placeholder-val="{{ false }}">
+    <article data-screen-label="Blog post" style="max-width:720px;margin:0 auto;padding:40px 24px">
+      <button onClick="{{ goBlogs }}" style="border:0;background:transparent;color:#555a8a;font:500 14px Poppins;cursor:pointer;padding:0;margin-bottom:20px">← All posts</button>
+      <span style="display:block;font:500 13px Poppins;color:#ff4f8b;margin-bottom:8px">{{ post.tag }} · {{ post.mins }} min read</span>
+      <h1 style="margin:0 0 24px;font:700 clamp(32px,4vw,44px)/1.1 Fredoka;letter-spacing:-.02em;text-wrap:balance">{{ post.title }}</h1>
+      <div style="position:relative;aspect-ratio:16/9;border-radius:24px;overflow:hidden;background:{{ post.tint }};margin-bottom:28px"><image-slot id="blog-{{ post.i }}" src="{{ post.cover }}" fit="cover" shape="rect" placeholder="Blog cover" style="position:absolute;inset:0;width:100%;height:100%"></image-slot></div>
+      <sc-for list="{{ post.body }}" as="para" hint-placeholder-count="3">
+        <p style="margin:0 0 18px;font-size:17px;line-height:1.75;color:#3a3f73;text-wrap:pretty">{{ para }}</p>
+      </sc-for>
+      <button onClick="{{ goCatalogue }}" style="border:0;background:{{ ctaBg }};color:{{ ctaFg }};font:600 16px Fredoka;height:52px;padding:0 28px;border-radius:999px;cursor:pointer;margin-top:12px;white-space:nowrap">Shop colouring kits</button>
+    </article>
+  </sc-if>
+
+  <footer style="max-width:1280px;margin:40px auto 0;padding:32px 24px;border-top:1px solid #f1e6e0;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:14px;color:#555a8a">
+    <span>© 2026 JerriX Toys · Where play meets purpose</span>
+    <span>Non-toxic · BIS certified · Made in India</span>
+  </footer>
+
+
+  <sc-if value="{{ cartOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeCart }}" style="position:fixed;inset:0;background:rgba(27,31,94,.45);z-index:60"></div>
+    <aside aria-label="Cart" style="position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:#fffaf7;z-index:61;display:flex;flex-direction:column;box-shadow:-20px 0 40px -20px rgba(27,31,94,.5)">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid #f1e6e0">
+        <span style="font:700 22px Fredoka">Your cart · {{ cartCount }}</span>
+        <button onClick="{{ closeCart }}" aria-label="Close cart" style="width:44px;height:44px;border-radius:999px;border:0;background:#f6f3fb;cursor:pointer;font:600 18px Poppins;color:#1b1f5e">✕</button>
+      </div>
+      <div style="flex:1;overflow:auto;padding:16px 22px;display:flex;flex-direction:column;gap:12px">
+        <sc-if value="{{ cartEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;padding:48px 0;display:flex;flex-direction:column;gap:14px;align-items:center">
+            <span style="font:600 20px Fredoka">Your cart is empty</span>
+            <button onClick="{{ goCatalogue }}" style="border:0;background:#1b1f5e;color:#fff;font:600 15px Fredoka;height:48px;padding:0 24px;border-radius:999px;cursor:pointer">Browse kits</button>
+          </div>
+        </sc-if>
+        <sc-for list="{{ lines }}" as="l" hint-placeholder-count="0">
+          <div style="display:flex;gap:12px;background:#fff;border:1px solid #f1e6e0;border-radius:18px;padding:12px">
+            <div style="position:relative;width:72px;height:72px;border-radius:12px;overflow:hidden;background:{{ l.tint }};flex:none"><image-slot id="prod-{{ l.id }}" src="{{ l.img }}" shape="rect" placeholder="" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></image-slot></div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;justify-content:space-between;gap:8px"><span style="display:flex;flex-direction:column;gap:2px"><span style="font:600 15px/1.25 Fredoka">{{ l.name }}</span><span style="font:500 12px Poppins;color:#167a43">+ {{ l.sticker }}</span></span><button onClick="{{ l.remove }}" aria-label="Remove" style="border:0;background:transparent;color:#8a8db0;cursor:pointer;font:500 12px Poppins;padding:0;align-self:flex-start">Remove</button></div>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="display:flex;align-items:center;border:1px solid #ece4f5;border-radius:999px;background:#fff">
+                  <button aria-label="Decrease" onClick="{{ l.dec }}" style="width:36px;height:36px;border:0;background:transparent;cursor:pointer;font:600 16px Fredoka;color:#1b1f5e">−</button>
+                  <span style="min-width:20px;text-align:center;font:600 14px Poppins">{{ l.qty }}</span>
+                  <button aria-label="Increase" onClick="{{ l.inc }}" style="width:36px;height:36px;border:0;background:transparent;cursor:pointer;font:600 16px Fredoka;color:#1b1f5e">+</button>
+                </div>
+                <span style="font:600 15px Poppins">{{ l.totalTxt }}</span>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ hasUpsell }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:6px;display:flex;flex-direction:column;gap:10px">
+            <span style="font:600 15px Fredoka">Kids also love</span>
+            <sc-for list="{{ upsell }}" as="u" hint-placeholder-count="2">
+              <div style="display:flex;gap:12px;align-items:center;background:#fff;border:1px dashed #e2d8ee;border-radius:16px;padding:10px">
+                <div style="position:relative;width:48px;height:48px;border-radius:10px;overflow:hidden;background:{{ u.tint }};flex:none"><image-slot id="prod-{{ u.id }}" src="{{ u.img }}" shape="rect" placeholder="" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></image-slot></div>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font:600 14px/1.25 Fredoka">{{ u.name }}</span><span style="font-size:13px;color:#555a8a">{{ u.priceTxt }}</span></div>
+                <button onClick="{{ u.add }}" style="border:2px solid #1b1f5e;background:transparent;color:#1b1f5e;font:600 13px Poppins;height:36px;padding:0 14px;border-radius:999px;cursor:pointer;white-space:nowrap">Add</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      <sc-if value="{{ cartHasItems }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:16px 22px 22px;border-top:1px solid #f1e6e0;display:flex;flex-direction:column;gap:8px;background:#fff">
+          <div style="display:flex;justify-content:space-between;font-size:14px;color:#555a8a"><span>Subtotal</span><span>{{ subTxt }}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;color:#555a8a"><span>Shipping</span><span>Free</span></div>
+          <span style="font-size:12px;color:#555a8a">First order? Use WELCOME5 at checkout for 5% off.</span>
+          <button onClick="{{ goCheckout }}" style="border:0;background:#ff4f8b;color:#fff;font:600 18px Fredoka;height:56px;border-radius:999px;cursor:pointer;margin-top:4px;white-space:nowrap">Checkout · {{ subTxt }}</button>
+        </div>
+      </sc-if>
+    </aside>
+  </sc-if>
+
+  <sc-if value="{{ signinOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSignin }}" style="position:fixed;inset:0;background:rgba(27,31,94,.45);z-index:60"></div>
+    <div role="dialog" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(420px,calc(100% - 32px));background:#fff;border-radius:28px;padding:28px;z-index:61;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 60px -20px rgba(27,31,94,.5)">
+      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:700 24px Fredoka">{{ signTitle }}</span><button onClick="{{ closeSignin }}" aria-label="Close" style="width:40px;height:40px;border-radius:999px;border:0;background:#f6f3fb;cursor:pointer;font:600 16px Poppins;color:#1b1f5e">✕</button></div>
+      <sc-if value="{{ signStepPhone }}" hint-placeholder-val="{{ true }}">
+        <label style="display:flex;flex-direction:column;gap:6px;font:600 14px Poppins;color:#1b1f5e">Mobile number<input value="{{ signPhone }}" onChange="{{ setSignPhone }}" inputmode="numeric" maxlength="10" placeholder="10-digit mobile" style="height:48px;border-radius:14px;border:2px solid #ece4f5;background:#fff;padding:0 16px;font:15px Poppins;color:#1b1f5e;outline:none;width:100%"></label>
+        <button onClick="{{ sendOtp }}" style="border:0;background:#1b1f5e;color:#fff;font:600 17px Fredoka;height:52px;border-radius:999px;cursor:pointer">Send OTP</button>
+      </sc-if>
+      <sc-if value="{{ signStepOtp }}" hint-placeholder-val="{{ false }}">
+        <span style="font-size:14px;color:#555a8a">Enter the 4-digit code sent to {{ signPhone }}. (Prototype: any 4 digits work.)</span>
+        <input value="{{ otp }}" onChange="{{ setOtp }}" inputmode="numeric" maxlength="4" placeholder="••••" style="height:48px;border-radius:14px;border:2px solid #ece4f5;background:#fff;padding:0 16px;font:15px Poppins;color:#1b1f5e;outline:none;width:100%;letter-spacing:.5em;text-align:center;font-size:20px">
+        <button onClick="{{ verifyOtp }}" style="border:0;background:#1b1f5e;color:#fff;font:600 17px Fredoka;height:52px;border-radius:999px;cursor:pointer">Verify</button>
+      </sc-if>
+      <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
+        <span style="font-size:15px;color:#1b1f5e">You're signed in as {{ signPhone }}.</span>
+        <button onClick="{{ signOut }}" style="border:2px solid #1b1f5e;background:transparent;color:#1b1f5e;font:600 15px Fredoka;height:48px;border-radius:999px;cursor:pointer">Sign out</button>
+      </sc-if>
+      <sc-if value="{{ hasSignErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#d0263a">{{ signErr }}</span></sc-if>
+    </div>
+  </sc-if>
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;top:96px;left:50%;transform:translateX(-50%);background:#1b1f5e;color:#fff;padding:14px 20px;border-radius:16px;font:500 14px Poppins;box-shadow:0 12px 30px -10px rgba(27,31,94,.5);z-index:70">{{ toast }}</div>
+  </sc-if>
+
+  <div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#fff;border-radius:999px;padding:6px;display:flex;gap:4px;box-shadow:0 12px 36px -12px rgba(27,31,94,.45);z-index:30;border:1px solid #f1e6e0">
+    <sc-for list="{{ switcher }}" as="s" hint-placeholder-count="4">
+      <button onClick="{{ s.go }}" style="border:0;background:{{ s.bg }};color:{{ s.color }};font:600 13px Poppins;padding:10px 16px;border-radius:999px;cursor:pointer;white-space:nowrap">{{ s.label }}</button>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;ctaColor&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;orange&quot;,&quot;pink&quot;,&quot;blue&quot;],&quot;default&quot;:&quot;orange&quot;,&quot;tsType&quot;:&quot;'orange'|'pink'|'blue'&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;showTicker&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;showBadges&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Product cards&quot;}}">
+const P = [
+  { id:'rocket', theme:'Rocket', name:'3D Chalk Rocket Colouring Kit', sub:'Rocket, astronaut & planets · 6 colours + brush', tag:'Space · Adventure', age:'3+', price:395, mrp:449, tint:'#ffe6a8', rating:0, reviews:0 },
+  { id:'dino', theme:'Dino', name:'3D Chalk Dino Colouring Kit', sub:'4 dinosaur models · 6 colours + brush', tag:'Explore · Dino world', age:'3+', price:395, mrp:449, tint:'#dff2c4', rating:5, reviews:2 },
+  { id:'fruit', theme:'Fruit', name:'3D Chalk Fruit Colouring Kit', sub:'10 fruit pieces that turn into fridge magnets', tag:'Colour · Match · Play', age:'3+', price:689, mrp:749, tint:'#f5ecb0', rating:5, reviews:1 },
+  { id:'pot', theme:'Pot', name:'3D Chalk Pot Colouring Kit', sub:'Set of 10 pots · pattern guide included', tag:'Decorate · Display', age:'6+', price:643, mrp:699, tint:'#ffd9c2', rating:3, reviews:2 },
+  { id:'wonders', theme:'7 Wonders', name:'3D Chalk 7 Wonders Colouring Kit', sub:'7 world landmarks · fact cards', tag:'Wonders · Learn', age:'6+', price:551, mrp:599, tint:'#c9f1fb', rating:0, reviews:0 },
+  { id:'flowers', theme:'Flowers', name:'3D Chalk Flower Colouring Kit', sub:'3 detailed flowers · tempera colours', tag:'Detail · Colour · Use', age:'3+', price:381, mrp:449, tint:'#ffd6d6', rating:0, reviews:0 },
+  { id:'insects', theme:'Insects', name:'3D Chalk Insect Colouring Kit', sub:'Butterfly, ladybug & friends', tag:'Colour the tiny world', age:'3+', price:381, mrp:449, tint:'#e6dcff', rating:0, reviews:0 },
+  { id:'mandala', theme:'Mandala', name:'3D Chalk Mandala Colouring Kit', sub:'Mandala discs · calm, focused colouring', tag:'Calm · Creative · Focus', age:'3+', price:319.2, mrp:399, tint:'#d6e4ff', rating:0, reviews:0 },
+];
+const rs = n => 'Rs. ' + (Number.isInteger(n) ? n : n.toFixed(2));
+const NOTES = [
+  ['Header','Announcement bar repeats the same 3 messages','Three distinct messages shown once. Welcome offer stated with its code.','#1b1f5e'],
+  ['Header','Active page is only a colour change','Active nav item gets pink text, bolder weight and a soft pill background.','#1b1f5e'],
+  ['Hero','Blurry, flat hero image feels low quality','Slot for a high-res cut-out photo with drop shadow and white frame.','#1fa3e0'],
+  ['Hero','Trust points repeated in hero and strip below','Shown once as chips in the hero. The flat rectangle strip is replaced by a wave edge.','#1fa3e0'],
+  ['Story','01/02/03 numbering and "Color / Build" label','Three verbs: Pick it, Colour it, Use it. No numbers needed for 3 steps.','#ffa200'],
+  ['Story','All three photos share one composition','Placeholders brief three different shots: close-up, over-shoulder, wide.','#ffa200'],
+  ['Skills','Chevrons on skill rows do nothing','Chevrons removed. Rows are static content tiles, not fake buttons.','#1a9b57'],
+  ['Listing','5 cards per row feels cramped','Max 4 per row with more padding.','#ff4f8b'],
+  ['Listing','Two offers per card (12% OFF + Opening 5%)','One "Save X%" badge per card. The 5% becomes a first-order code shown once.','#ff4f8b'],
+  ['Listing','Name hides what the product is','Lead with "3D Chalk Rocket Colouring Kit"; age as a badge, theme as a tag.','#ff4f8b'],
+  ['Catalogue','Availability, price, sort, grid/list: too many controls, tiny arrows','Age chips + one sort control, all 44px targets. Grid/list toggle removed.','#6a1fe0'],
+  ['PDP','No arrows on gallery, no video','Large prev/next buttons, image counter, and a video thumbnail.','#ee2b3b'],
+  ['PDP','Strikethrough price gives no context','MRP label, rupee saving and % off, plus tax and delivery line.','#ee2b3b'],
+  ['PDP','Static "10 customers viewing" widget','Removed. Real review count shown only where reviews exist.','#ee2b3b'],
+  ['PDP','No feature icons; wall of copy','Feature tiles for safety claims. Description split into collapsible sections.','#ee2b3b'],
+  ['PDP','No cross-sell, no personalisation','Frequently bought together bundle, related kits, and a free name-on-box option.','#ee2b3b'],
+];
+
+const TICK = [['Free shipping across India','#fff'],['Extra 5% off your first order · code WELCOME5','#ffc94d'],['Designed by IIT Guwahati alumni','#fff']];
+const tickerEl = () => {
+  const items = [...TICK, ...TICK, ...TICK, ...TICK].map(([t,c],i) => React.createElement('span', { key:i, style:{ color:c, padding:'0 28px', display:'inline-flex', alignItems:'center', gap:28 } }, t, React.createElement('span', { style:{ width:5, height:5, borderRadius:9, background:'#ff4f8b', display:'inline-block', marginLeft:28 } })));
+  return React.createElement('div', { className:'jx-track', style:{ display:'flex', width:'max-content', whiteSpace:'nowrap', font:'500 13px Poppins', lineHeight:'38px', animation:'jx-marquee 28s linear infinite' } }, items);
+};
+const COVERS = ['assets/story-colour.webp','assets/story-pick.webp','assets/p/rocket-2.webp'];
+const HAS_IMG = ['fruit','dino','pot','wonders','mandala','insects','rocket','flowers'];
+const STICK = { dino:'Dino', rocket:'Space', fruit:'Fruit', pot:'Pattern', wonders:'Landmark', flowers:'Flower', insects:'Bug', mandala:'Mandala' };
+P.forEach(p => { p.img = HAS_IMG.includes(p.id) ? 'assets/p/' + p.id + '-0.webp' : ''; p.sticker = 'Free ' + STICK[p.id] + ' sticker'; p.stickerIcon = 'assets/stickers/' + p.id + '.svg'; });
+class Component extends DCLogic {
+  state = { page:'home', pid:'fruit', cart:[], cartOpen:false, img:4, open:'about', age:'all', sort:'featured', qty:1, toast:'', gift:'',
+    q:'', qFocus:false, qActive:'', code:'', applied:false, codeMsg:'', codeOk:true, pay:'upi', f:{ name:'', phone:'', email:'', addr:'', city:'', pin:'' }, formErr:'', order:null,
+    cf:{ name:'', email:'', topic:'Order help', msg:'' }, cfErr:'', contactSent:false, post:0,
+    signinOpen:false, signStep:'phone', signPhone:'', otp:'', signErr:'' };
+
+  go = page => { this.setState({ page, cartOpen:false }); window.scrollTo(0,0); };
+  open = pid => { this.setState({ page:'product', pid, img:4, qty:1, open:'about' }); window.scrollTo(0,0); };
+  toastMsg = t => { clearTimeout(this._t); this.setState({ toast:t }); this._t = setTimeout(() => this.setState({ toast:'' }), 2200); };
+  add = (id, n = 1, open = true) => {
+    this.setState(s => { const cart = [...s.cart]; const i = cart.findIndex(c => c.id === id); if (i >= 0) cart[i] = { ...cart[i], qty: cart[i].qty + n }; else cart.push({ id, qty:n }); return { cart, cartOpen: open }; });
+    if (!open) this.toastMsg(P.find(p => p.id === id).name + ' added to cart');
+  };
+  setQty = (id, d) => this.setState(s => ({ cart: s.cart.map(c => c.id === id ? { ...c, qty: c.qty + d } : c).filter(c => c.qty > 0) }));
+  fset = (k) => e => { const v = e.target.value; this.setState(s => ({ f: { ...s.f, [k]: k === 'phone' || k === 'pin' ? v.replace(/\D/g,'') : v }, formErr:'' })); };
+  cset = (k) => e => { const v = e.target.value; this.setState(s => ({ cf: { ...s.cf, [k]: v }, cfErr:'' })); };
+  card = p => ({
+    ...p, pct: Math.round((1 - p.price / p.mrp) * 100), priceTxt: rs(p.price), mrpTxt: rs(p.mrp),
+    ratingTxt: p.reviews ? '★'.repeat(p.rating) + '☆'.repeat(5 - p.rating) + '  ' + p.rating.toFixed(1) + ' · ' + p.reviews + (p.reviews > 1 ? ' reviews' : ' review') : 'New · be the first to review',
+    open: () => this.open(p.id), add: e => { if (e && e.stopPropagation) e.stopPropagation(); this.add(p.id); },
+  });
+
+  extra(s, match) {
+    const byId = id => P.find(p => p.id === id);
+    const lines = s.cart.map(c => { const p = byId(c.id); return { ...p, qty:c.qty, totalTxt: rs(Math.round(p.price * c.qty * 100) / 100), remove: () => this.setQty(c.id, -c.qty), dec: () => this.setQty(c.id, -1), inc: () => this.setQty(c.id, 1) }; });
+    const sub = Math.round(lines.reduce((a,l) => a + l.price * l.qty, 0) * 100) / 100;
+    const disc = s.applied ? Math.round(sub * 5) / 100 : 0;
+    const total = Math.round((sub - disc) * 100) / 100;
+    const inCart = s.cart.map(c => c.id);
+    const sugg = s.q.trim() ? P.filter(p => match(p, s.q)).slice(0, 5) : [];
+    const PAY = [['upi','UPI','Google Pay, PhonePe, Paytm'],['card','Card','Credit or debit card'],['cod','Cash on delivery','Pay when it arrives']];
+    const BLOGS = [
+      { tag:'Play ideas', mins:4, title:'Five screen-free activities for a rainy afternoon', tint:'#dcf1fd', excerpt:'Simple ideas that keep little hands busy without a screen in sight.', body:['Rainy days do not have to mean more screen time. A few simple materials and a clear table are usually enough.','Start with something tactile. Colouring a 3D chalk model gives children a shape to explore with their hands as well as their eyes.','When the paint dries, the same model works as chalk. Lay down a black sheet and let them draw the story of what they just made.'] },
+      { tag:'Parenting', mins:5, title:'Why open-ended play builds confidence', tint:'#fff0cf', excerpt:'When there is no single right answer, children learn to trust their own choices.', body:['Open-ended toys let a child decide what the result should look like. That small act of choosing builds confidence over time.','A blank chalk model has no correct colour scheme. Every decision belongs to the child, and every result is valid.','Praise the process rather than the outcome: ask what they chose and why, instead of only saying it looks nice.'] },
+      { tag:'Learning', mins:3, title:'What STEAM learning looks like at age 3', tint:'#eaf8ef', excerpt:'Science, art and maths show up in everyday play earlier than you think.', body:['STEAM is not only for older children. At three, it looks like sorting colours, matching shapes and noticing how paint changes as it dries.','Kits like the fruit set add a matching game: pair each whole fruit with its slice, then paint both.','Keep sessions short and follow the child’s interest. Ten focused minutes beat an hour of pushing through.'] },
+    ];
+    const post = BLOGS[s.post];
+    const o = s.order;
+    return {
+      cartCount: s.cart.reduce((a,c) => a + c.qty, 0), cartOpen: s.cartOpen, lines, cartEmpty: !lines.length, cartHasItems: lines.length > 0,
+      openCart: () => this.setState({ cartOpen:true }), closeCart: () => this.setState({ cartOpen:false }),
+      upsell: P.filter(p => !inCart.includes(p.id)).slice(0, 2).map(p => ({ ...p, priceTxt: rs(p.price), add: () => this.add(p.id) })), hasUpsell: lines.length > 0,
+      subTxt: rs(sub), discTxt: rs(disc), totalTxt: rs(total), applied: s.applied,
+      goCheckout: () => this.go('checkout'),
+      code: s.code, setCode: e => this.setState({ code: e.target.value, codeMsg:'' }),
+      applyCode: () => s.code.trim().toUpperCase() === 'WELCOME5' ? this.setState({ applied:true, codeOk:true, codeMsg:'WELCOME5 applied · 5% off your first order' }) : this.setState({ applied:false, codeOk:false, codeMsg: s.code.trim() ? 'That code is not valid' : 'Enter a code' }),
+      codeMsg: s.codeMsg, codeColor: s.codeOk ? '#167a43' : '#d0263a',
+      f: s.f, setName: this.fset('name'), setPhone: this.fset('phone'), setEmail: this.fset('email'), setAddr: this.fset('addr'), setCity: this.fset('city'), setPin: this.fset('pin'),
+      payOpts: PAY.map(([k,l,sb]) => ({ label:l, sub:sb, border: s.pay === k ? '#1b1f5e' : '#ece4f5', bg: s.pay === k ? '#f6f3fb' : '#fff', dot: s.pay === k ? '#1b1f5e' : 'transparent', pick: () => this.setState({ pay:k }) })),
+      formErr: s.formErr, hasFormErr: !!s.formErr,
+      placeOrder: () => {
+        const f = s.f;
+        const err = !lines.length ? 'Your cart is empty.' : !f.name.trim() ? 'Add your full name.' : f.phone.length !== 10 ? 'Enter a 10-digit mobile number.' : !f.addr.trim() ? 'Add your delivery address.' : !f.city.trim() ? 'Add your city.' : f.pin.length !== 6 ? 'Enter a 6-digit pincode.' : '';
+        if (err) return this.setState({ formErr: err });
+        this.setState({ order: { id: 'JX' + Math.floor(10000 + Math.random() * 90000), name: f.name.split(' ')[0], phone: f.phone, city: f.city, pin: f.pin, count: lines.reduce((a,l) => a + l.qty, 0), pay: PAY.find(p => p[0] === s.pay)[1], totalTxt: rs(total) }, cart:[], applied:false, code:'', codeMsg:'', formErr:'' });
+        this.go('done');
+      },
+      order: o || { id:'', name:'', phone:'', city:'', pin:'', count:0, pay:'', totalTxt:'' },
+      q: s.q, setQ: e => this.setState({ q: e.target.value }),
+      qFocus: () => this.setState({ qFocus:true }), qBlur: () => setTimeout(() => this.setState({ qFocus:false }), 150),
+      qKey: e => { if (e.key === 'Enter') { this.setState({ qActive: s.q.trim(), qFocus:false, age:'all' }); this.go('catalogue'); e.target.blur(); } if (e.key === 'Escape') this.setState({ qFocus:false }); },
+      qAll: () => { this.setState({ qActive: s.q.trim(), qFocus:false, age:'all' }); this.go('catalogue'); },
+      showSuggest: s.qFocus && !!s.q.trim(), suggest: sugg.map(p => ({ ...p, priceTxt: rs(p.price), open: () => { this.setState({ qFocus:false, q:'' }); this.open(p.id); } })), noSuggest: !sugg.length,
+      qActive: s.qActive, hasQActive: !!s.qActive, clearQ: () => this.setState({ qActive:'', q:'' }),
+      cf: s.cf, setCfName: this.cset('name'), setCfEmail: this.cset('email'), setCfTopic: this.cset('topic'), setCfMsg: this.cset('msg'),
+      cfErr: s.cfErr, hasCfErr: !!s.cfErr, contactSent: s.contactSent, contactForm: !s.contactSent,
+      sendContact: () => { const c = s.cf; const err = !c.name.trim() ? 'Add your name.' : !/^\S+@\S+\.\S+$/.test(c.email) ? 'Enter a valid email.' : !c.msg.trim() ? 'Write a message.' : ''; if (err) return this.setState({ cfErr: err }); this.setState({ contactSent:true }); },
+      resetContact: () => this.setState({ contactSent:false, cf:{ name:'', email:'', topic:'Order help', msg:'' } }),
+      blogs: BLOGS.map((b,i) => ({ ...b, cover: COVERS[i], open: () => { this.setState({ post:i }); this.go('article'); } })),
+      post: { ...post, i: s.post, cover: COVERS[s.post] }, goBlogs: () => this.go('blogs'),
+      signinOpen: s.signinOpen, openSignin: () => this.setState({ signinOpen:true, signErr:'' }), closeSignin: () => this.setState({ signinOpen:false }),
+      signTitle: s.signStep === 'done' ? 'Your account' : 'Sign in',
+      signStepPhone: s.signStep === 'phone', signStepOtp: s.signStep === 'otp', signedIn: s.signStep === 'done',
+      signPhone: s.signPhone, setSignPhone: e => this.setState({ signPhone: e.target.value.replace(/\D/g,''), signErr:'' }),
+      otp: s.otp, setOtp: e => this.setState({ otp: e.target.value.replace(/\D/g,''), signErr:'' }),
+      sendOtp: () => s.signPhone.length === 10 ? this.setState({ signStep:'otp', signErr:'' }) : this.setState({ signErr:'Enter a 10-digit mobile number.' }),
+      verifyOtp: () => s.otp.length === 4 ? (this.setState({ signStep:'done', signinOpen:false, signErr:'', f: { ...s.f, phone: s.f.phone || s.signPhone } }), this.toastMsg('Signed in')) : this.setState({ signErr:'Enter the 4-digit code.' }),
+      signOut: () => this.setState({ signStep:'phone', otp:'', signinOpen:false }),
+      signErr: s.signErr, hasSignErr: !!s.signErr,
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const pages = [['home','Home'],['catalogue','Catalogue'],['product','Product'],['notes','UX notes']];
+    const nav = [['home','Home'],['catalogue','Catalogue'],['contact','Contact us'],['about','About us'],['blogs','Blogs']].map(([k,l]) => {
+      const a = s.page === k || (k === 'catalogue' && s.page === 'product') || (k === 'blogs' && s.page === 'article');
+      return { label:l, bg: a ? '#fff0f5' : 'transparent', color: a ? '#ff4f8b' : '#1b1f5e', font: (a ? '600' : '500') + ' clamp(13px,1.05vw,15px) Fredoka', go: () => this.go(k) };
+    });
+    const cur = this.card(P.find(p => p.id === s.pid));
+    cur.saveTxt = rs(Math.round((cur.mrp - cur.price) * 100) / 100);
+    const slides = [cur.theme + ' kit · box front on colour blob', 'Inside the box · flat lay of models, paints, brush', 'Lifestyle · child colouring at a table', 'Finished models in use at home', 'VIDEO · 30s build-and-paint demo'];
+    const tl = ['Box','Inside','Play','Result','▶ Video'];
+    const match = (p, q) => (p.name + ' ' + p.theme + ' ' + p.tag + ' age ' + p.age + ' ' + p.sub).toLowerCase().includes(q.toLowerCase().trim());
+    let list = P.filter(p => (s.age === 'all' || p.age === s.age) && (!s.qActive || match(p, s.qActive)));
+    if (s.sort === 'low') list = [...list].sort((a,b) => a.price - b.price);
+    if (s.sort === 'high') list = [...list].sort((a,b) => b.price - a.price);
+    const others = P.filter(p => p.id !== s.pid);
+    const bundle = [P.find(p => p.id === s.pid), others[0], others[1]];
+    const accItems = {
+      about: [cur.sub + '.', 'Kids assemble the chalk models, paint them and keep using them afterwards.', 'About 90 minutes of focused, screen-free play per session.'],
+      inside: ['3D chalk models', '6 non-toxic tempera colours', '1 paint brush', 'Step-by-step guide'],
+      skills: ['Fine motor skills and hand-eye coordination', 'Observation, patience and attention span', 'Creative thinking with no wrong answers'],
+      safety: ['Made from child-safe chalk (khadu)', 'Non-toxic, water-based paints', 'BIS certified · not for children under 3'],
+    };
+    return {
+      ticker: this._ticker || (this._ticker = tickerEl()),
+      toast: s.toast, hasToast: !!s.toast,
+      ...({ orange:{ ctaBg:'#ffa200', ctaFg:'#1b1f5e', ctaShadow:'#d98300' }, pink:{ ctaBg:'#ff4f8b', ctaFg:'#fff', ctaShadow:'#c8235f' }, blue:{ ctaBg:'#1fa3e0', ctaFg:'#fff', ctaShadow:'#0b6ea8' } }[this.props.ctaColor] || { ctaBg:'#ffa200', ctaFg:'#1b1f5e', ctaShadow:'#d98300' }),
+      showTicker: this.props.showTicker ?? true, showBadges: this.props.showBadges ?? true,
+      ...this.extra(s, match),
+      isHome: s.page === 'home', isCatalogue: s.page === 'catalogue', isProduct: s.page === 'product', isNotes: s.page === 'notes', isCheckout: s.page === 'checkout', isDone: s.page === 'done', isAbout: s.page === 'about', isContact: s.page === 'contact', isBlogs: s.page === 'blogs', isArticle: s.page === 'article',
+      nav, goHome: () => this.go('home'), goCatalogue: () => this.go('catalogue'),
+      scrollHow: () => { const el = document.getElementById('how'); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 90, behavior:'smooth' }); },
+      switcher: pages.map(([k,l]) => ({ label:l, bg: s.page === k ? '#1b1f5e' : 'transparent', color: s.page === k ? '#fff' : '#1b1f5e', go: () => this.go(k) })),
+      trust: [{label:'Non-toxic',c:'#1a9b57'},{label:'BIS certified',c:'#1fa3e0'},{label:'Designed by IIT-G alumni',c:'#ffa200'},{label:'Loved by 500+ families',c:'#ff4f8b'}],
+      story: [
+        { label:'Pick it', src:'assets/story-pick.webp', c:'#ff4f8b', tint:'#ffe3ee', rot:'-1.5deg', shot:'CLOSE-UP · small hand picking a white chalk model', desc:'Choose a chunky 3D character.' },
+        { label:'Colour it', src:'assets/story-colour.webp', c:'#ffa200', tint:'#fff0cf', rot:'1deg', shot:'OVER-SHOULDER · child mid-brushstroke', desc:'Turn every side into a story.' },
+        { label:'Use it', src:'assets/story-use.webp', c:'#1fa3e0', tint:'#dcf1fd', rot:'-0.5deg', shot:'WIDE · finished models displayed at home', desc:'Keep it, gift it, or draw with it.' },
+      ],
+      skills: [
+        { title:'Creative thinking', desc:'Every blank shape starts a new story.', c:'#ffa200', bg:'#fff6e2', initial:'C' },
+        { title:'Fine motor skills', desc:'Grasping and colouring build control.', c:'#1fa3e0', bg:'#e8f6fe', initial:'F' },
+        { title:'Independent play', desc:'Simple enough to explore solo.', c:'#1a9b57', bg:'#eaf8ef', initial:'I' },
+        { title:'Confidence', desc:'No wrong answers, only new ideas.', c:'#ff4f8b', bg:'#fff0f5', initial:'C' },
+      ],
+      bestsellers: ['fruit','dino','pot','wonders'].map(id => this.card(P.find(p => p.id === id))),
+      ages: [['all','All ages'],['3+','3+ years'],['6+','6+ years']].map(([k,l]) => ({ label:l, bg: s.age === k ? '#1b1f5e' : '#fff', color: s.age === k ? '#fff' : '#1b1f5e', border: s.age === k ? '#1b1f5e' : '#ece4f5', pick: () => this.setState({ age:k }) })),
+      sort: s.sort, setSort: e => this.setState({ sort: e.target.value }),
+      catalogue: list.map(this.card), countTxt: list.length + ' kits',
+      cur, slideLabel: slides[s.img], isVideo: s.img === 4, notVideo: s.img !== 4, slideSrc: (HAS_IMG.includes(cur.id) && s.img < 4) ? 'assets/p/' + cur.id + '-' + s.img + '.webp' : '', slideSlot: s.img === 0 ? 'prod-' + cur.id : 'pdp-' + cur.id + '-' + s.img, slideCount: (s.img + 1) + ' / ' + slides.length,
+      prevImg: () => this.setState({ img: (s.img + slides.length - 1) % slides.length }),
+      nextImg: () => this.setState({ img: (s.img + 1) % slides.length }),
+      thumbs: tl.map((l,i) => { const has = HAS_IMG.includes(cur.id) && i < 4; return { label:l, text: has ? '' : l, chip: has ? 'transparent' : 'transparent', border: i === s.img ? '#ff4f8b' : '#f1e6e0', bg: i === 4 ? '#1b1f5e' : (has ? '#fff' : cur.tint), color: i === 4 ? '#fff' : '#4b5088', bgImg: has ? 'url(assets/p/' + cur.id + '-' + i + '.webp)' : 'none', pick: () => this.setState({ img:i }) }; }),
+      features: [{label:'Non-toxic',c:'#1a9b57',bg:'#eaf8ef',initial:'N'},{label:'BIS certified',c:'#1fa3e0',bg:'#e8f6fe',initial:'B'},{label:'Reusable',c:'#ffa200',bg:'#fff6e2',initial:'R'},{label:'Screen-free',c:'#ff4f8b',bg:'#fff0f5',initial:'S'}],
+      giftName: s.gift, setGift: e => this.setState({ gift: e.target.value }),
+      qty: s.qty, decQty: () => this.setState({ qty: Math.max(1, s.qty - 1) }), incQty: () => this.setState({ qty: s.qty + 1 }),
+      addCur: () => this.add(cur.id, s.qty), buyNow: () => { this.add(cur.id, s.qty, false); this.go('checkout'); },
+      accordion: [['about','About this kit'],['inside',"What's inside"],['skills','Skills it builds'],['safety','Safety & materials']].map(([k,t]) => ({ title:t, open: s.open === k, sign: s.open === k ? '−' : '+', items: accItems[k], toggle: () => this.setState({ open: s.open === k ? '' : k }) })),
+      bundle: bundle.map((p,i) => ({ ...p, priceTxt: rs(p.price), plus: i ? 'block' : 'none' })),
+      bundleTotal: rs(Math.round(bundle.reduce((a,p) => a + p.price, 0) * 100) / 100),
+      addBundle: () => { bundle.forEach(p => this.add(p.id, 1, false)); this.setState({ cartOpen:true }); },
+      related: others.slice(2, 6).map(this.card),
+      notes: NOTES.map(([area,issue,fix,c]) => ({ area, issue, fix, c })),
+    };
+  }
+}
+</script>
+</body>
+</html>
